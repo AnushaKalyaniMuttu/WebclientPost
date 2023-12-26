@@ -1,0 +1,28 @@
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+
+@Service
+public class StudentService {
+
+    private final WebClient webClient;
+
+    public StudentService(@Value("${api.baseurl}") String baseUrl) {
+        this.webClient = WebClient.builder()
+                .baseUrl(baseUrl)
+                .build();
+    }
+
+    public Flux<Student> getStudentsByAddress(String street, String city, String zipCode) {
+        return webClient.get()
+                .uri(uriBuilder ->
+                        uriBuilder.path("/students/byAddress")
+                                .queryParam("street", street)
+                                .queryParam("city", city)
+                                .queryParam("zipCode", zipCode)
+                                .build())
+                .retrieve()
+                .bodyToFlux(Student.class);
+    }
+}
